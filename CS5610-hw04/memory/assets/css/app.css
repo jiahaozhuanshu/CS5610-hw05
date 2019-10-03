@@ -1,0 +1,40 @@
+/* This file is for your main application css. */
+
+ @import "~milligram/dist/milligram";
+
+.col > p {
+    padding-top: 10ex;
+    text-align: center;
+}
+
+.reset {
+    background-color: red;
+    color: gold;
+    font-size:50px;
+}
+
+.hidden{
+    color:black;
+    height: 150px;
+    width: 200px;
+    font-size:50px;
+}
+
+.matching{
+    height:150px;
+    width:200px;
+    font-size:50px;
+}
+
+.disabled{
+    height:150px;
+    width:200px;
+    font-size:50px;
+
+}
+
+.reminder{
+    font-size:30px;
+    color:Aqua;
+
+}
