@@ -1,4 +1,4 @@
-// Attributions: 
+//Attributions: 
 // https://codepen.io/gaearon/pen/oWWQNa?editors=0010
 // https://zh-hans.reactjs.org/tutorial/tutorial.html
 // https://www.w3schools.com/jsref/jsref_map.asp
@@ -6,8 +6,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'lodash';
 
-export default function game_init(root) {
-  ReactDOM.render(<Starter />, root);
+export default function game_init(root, channel) {
+  ReactDOM.render(<Starter channel={channel} />, root);
 }
 
 
@@ -22,8 +22,8 @@ function Square(props) {
 
   else {
     return <button type="button" className="matching"> {props.lett} </button>
-  }
-
+ }
+  return <button type="button" className="hidden" onClick={() => props.onClick()}>wut</button>
 
 }
 
@@ -33,33 +33,42 @@ function Square(props) {
 class Starter extends React.Component {
   constructor(props) {
     super(props);
-    let letter_lst = _.shuffle(["A","A","B","B","C","C","D","D","E","E","F","F","G","G","H","H"]);
+    this.channel = props.channel
     this.state = {
-      letters: letter_lst,
+      letters: [],
       matching: [],
       show: [],
-      clicks: 0
-    
+      clicks: 0,
+      click_disabled: false
     };
+  this.channel
+	.join()
+	.receive("ok",this.got_view.bind(this))
+	.receive("error",resp =>{console.log("Unable to join",resp);});  
       
   }
 
 
+  got_view(view){
+    console.log("new view",view);
+    this.setState(view.game);
+  
+  }
+
 // pressing reset to return to the original state	
   restart() {
-    let letter_lst = _.shuffle(["A","A","B","B","C","C","D","D","E","E","F","F","G","G","H","H"]);
-    this.setState({
-      letters: letter_lst, 
-      matching: [], 
-      show: [],
-      clicks: 0
-        
-    })
+    this.channel.push("restart",{})
+	        .receive("ok", this.got_view.bind(this));
   }
 
 
 
   render() {
+    if(this.state.matching.length == 2){
+  	    this.channel.push("match",{})
+  	                .receive("ok", this.got_view.bind(this));
+    }
+
     let numClicks = this.state.clicks;
     const {letters,matching, show, clicks} = this.state;
     return (
@@ -115,21 +124,11 @@ class Starter extends React.Component {
     );
   }
 
-  clickHandler(ii) {
-    const {letters, matching, show, clicks} = this.state;
-    if(matching == 0) {
-      this.setState({matching: matching.concat(ii), clicks: this.state.clicks+1});
-    }
-
-    else if (letters[ii] == letters[matching[0]]) {
-      this.setState({matching:[], show:show.concat(matching[0], ii), clicks: this.state.clicks+1});
-    }
+  clickHandler(ii){
     
-    else {
-      this.setState({matching:[matching[0], ii]});
-      setTimeout(() => {this.setState({matching: [], clicks: this.state.clicks+1})}, 400);
-    }
+      this.channel.push("click",{index:ii})
+		  .receive("ok", this.got_view.bind(this));
     
-    }
+  
+  } 
 }
-
